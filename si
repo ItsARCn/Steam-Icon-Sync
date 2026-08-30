@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+
+STEAM="$HOME/.local/share/Steam"
+ICON_DIR="$HOME/.local/share/icons/hicolor/256x256/apps"
+APP_DIR="$HOME/.local/share/applications"
+
+mkdir -p "$ICON_DIR"
+
+changed=0
+
+for cache in "$STEAM"/appcache/librarycache/*; do
+    [ -d "$cache" ] || continue
+
+    appid=$(basename "$cache")
+
+    case "$appid" in
+        ''|*[!0-9]*) continue ;;
+    esac
+
+    logo=$(find "$cache" -type f -name 'logo.png' -print -quit)
+    [ -n "$logo" ] || continue
+
+    icon_name="steam_${appid}"
+    icon_path="$ICON_DIR/$icon_name.png"
+
+    for desktop in "$APP_DIR"/*.desktop; do
+        [ -f "$desktop" ] || continue
+
+        if grep -q "steam://rungameid/$appid" "$desktop" &&
+           grep -q '^Icon=steam$' "$desktop"; then
+
+            cp -f "$logo" "$icon_path"
+
+            sed -i "s/^Icon=steam$/Icon=$icon_name/" "$desktop"
+
+            game_name=$(grep '^Name=' "$desktop" | head -1 | cut -d= -f2-)
+
+            printf '✓ Changed icon: %s\n' "$game_name"
+            changed=$((changed + 1))
+
+            break
+        fi
+    done
+done
+
+kbuildsycoca6 >/dev/null 2>&1
+
+if [ "$changed" -eq 0 ]; then
+    echo "No icons needed updating."
+else
+    printf '\n✓ Done. Updated %d icon(s).\n' "$changed"
+fi
