@@ -8,7 +8,7 @@ STATE_FILE="$STATE_DIR/managed"
 APP_DIR="$HOME/.local/share/applications"
 
 if [ ! -f "$STATE_FILE" ]; then
-    echo "No icons managed by si were found."
+    echo "No icons managed by sis were found."
     exit 0
 fi
 
@@ -60,7 +60,7 @@ if command -v gtk-update-icon-cache >/dev/null 2>&1; then
 fi
 
 if [ "$cleaned" -eq 0 ]; then
-    echo "No icons created by si needed cleaning."
+    echo "No icons created by sis needed cleaning."
 else
     printf '\n✓ Done. Restored %d icon(s).\n' "$cleaned"
 fi

@@ -3,7 +3,7 @@
 set -e
 
 INSTALL_DIR="$HOME/.local/bin"
-BASE_URL="https://raw.githubusercontent.com/ItsARCn/steam-kde-icon-sync/main"
+BASE_URL="https://raw.githubusercontent.com/ItsARCn/Steam-Icon-Sync/main"
 
 mkdir -p "$INSTALL_DIR"
 
@@ -22,18 +22,18 @@ download() {
     fi
 }
 
-echo "→ Downloading si..."
-download "$BASE_URL/si" "$INSTALL_DIR/si"
+echo "→ Downloading sis..."
+download "$BASE_URL/sis" "$INSTALL_DIR/sis"
 
-echo "→ Downloading si-clean..."
-download "$BASE_URL/si-clean" "$INSTALL_DIR/si-clean"
+echo "→ Downloading sis-clean..."
+download "$BASE_URL/sis-clean" "$INSTALL_DIR/sis-clean"
 
-chmod +x "$INSTALL_DIR/si" "$INSTALL_DIR/si-clean"
+chmod +x "$INSTALL_DIR/sis" "$INSTALL_DIR/sis-clean"
 
 echo
-echo "✓ Installed steam-kde-icon-sync"
-echo "✓ Command available: si"
-echo "✓ Command available: si-clean"
+echo "✓ Installed Steam Icon Sync"
+echo "✓ Command available: sis"
+echo "✓ Command available: sis-clean"
 echo
-echo "Run 'si' to sync Steam game icons."
-echo "Run 'si-clean' to undo icons created by si."
+echo "Run 'sis' to sync Steam game icons."
+echo "Run 'sis-clean' to undo icons created by sis."
