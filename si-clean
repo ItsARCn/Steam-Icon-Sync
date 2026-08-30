@@ -5,6 +5,7 @@ set -e
 ICON_DIR="$HOME/.local/share/icons/hicolor/256x256/apps"
 STATE_DIR="$HOME/.local/share/steam-kde-icon-sync"
 STATE_FILE="$STATE_DIR/managed"
+APP_DIR="$HOME/.local/share/applications"
 
 if [ ! -f "$STATE_FILE" ]; then
     echo "No icons managed by si were found."
@@ -44,7 +45,19 @@ done < "$STATE_FILE"
 
 mv "$remaining" "$STATE_FILE"
 
-kbuildsycoca6 >/dev/null 2>&1
+if command -v kbuildsycoca6 >/dev/null 2>&1; then
+    kbuildsycoca6 >/dev/null 2>&1
+elif command -v kbuildsycoca5 >/dev/null 2>&1; then
+    kbuildsycoca5 >/dev/null 2>&1
+fi
+
+if command -v update-desktop-database >/dev/null 2>&1; then
+    update-desktop-database "$APP_DIR" >/dev/null 2>&1
+fi
+
+if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+    gtk-update-icon-cache -f -t "$HOME/.local/share/icons/hicolor" >/dev/null 2>&1 || true
+fi
 
 if [ "$cleaned" -eq 0 ]; then
     echo "No icons created by si needed cleaning."
