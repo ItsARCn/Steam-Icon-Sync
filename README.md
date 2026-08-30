@@ -1,69 +1,151 @@
-
 # Steam KDE Icon Sync
 
 Fix missing Steam game icons in KDE Plasma.
 
-Some Steam games create `.desktop` launchers that use the generic Steam icon instead of the game's actual artwork. `steam-kde-icon-sync` finds the game's cached Steam artwork and gives the launcher its proper icon.
+Steam sometimes creates game launchers that use the generic Steam icon instead of the game's actual artwork. Steam KDE Icon Sync finds the artwork already cached by Steam and uses it for the game's KDE launcher.
 
-Works with KDE application menus, KRunner, and other applications that use `.desktop` files.
+Designed for KDE Plasma, KRunner, and other applications that use `.desktop` launchers.
 
 ## Features
 
-- 🎮 Fix missing Steam game icons
-- 🖼️ Uses artwork already cached by Steam
-- 🖥️ Works with KDE Plasma and KRunner
-- ⚡ Lightweight and runs only when you use it
-- 🚫 No background service
-- 🚫 No timer
-- 🚫 No daemon
-- 🔒 Does not modify Steam's own files
-- ↩️ Can safely undo changes made by `si`
+* 🎮 Fix missing Steam game icons
+* 🖼️ Uses artwork already downloaded by Steam
+* 🖥️ Works with KDE Plasma and KRunner
+* ⚡ Lightweight
+* 🚫 No background service
+* 🚫 No timer
+* 🚫 No daemon
+* 🔒 Does not modify Steam's game files
+* ↩️ Safely undo changes made by `si`
+* 🧠 Tracks exactly which launchers were changed
 
-## Commands
+## Installation
 
-### `si`
+You do not need to clone the repository.
 
-Finds Steam games using the generic Steam icon and replaces it with the game's cached artwork.
+### Using curl
 
-```bash
+```
+curl -fsSL https://raw.githubusercontent.com/ItsARCn/steam-kde-icon-sync/main/install.sh | bash
+```
+
+### Using wget
+
+```
+wget -qO- https://raw.githubusercontent.com/ItsARCn/steam-kde-icon-sync/main/install.sh | bash
+```
+
+The installer supports both `curl` and `wget`.
+
+It installs:
+
+```
+~/.local/bin/si
+~/.local/bin/si-clean
+```
+
+After installation, you can use the commands from anywhere in the terminal.
+
+### Manual installation
+
+If you prefer to clone the repository:
+
+```
+git clone https://github.com/ItsARCn/steam-kde-icon-sync.git
+cd steam-kde-icon-sync
+./install.sh
+```
+
+## Usage
+
+### Fix Steam game icons
+
+Run:
+
+```
 si
-````
+```
 
-Example:
+`si` scans Steam's cached game artwork and finds Steam game launchers that are still using the generic Steam icon.
 
-```text
+For example:
+
+```
 ✓ Changed icon: Banana
 ✓ Changed icon: Allumeria
 
 ✓ Done. Updated 2 icon(s).
 ```
 
-If nothing needs changing:
+If everything is already fixed:
 
-```text
+```
 No icons needed updating.
 ```
 
-### `si-clean`
+Run `si` whenever you install a new Steam game or notice a game using the generic Steam icon.
 
-Undoes changes made by `si`.
+### Undo changes made by si
 
-```bash
+Run:
+
+```
 si-clean
 ```
 
-It restores the original icon setting and removes only the icon files created by `si`.
+This restores the original icon setting and removes the icon files created by `si`.
 
 Example:
 
-```text
+```
 ✓ Restored icon: Banana
 ✓ Restored icon: Allumeria
 
 ✓ Done. Restored 2 icon(s).
 ```
 
-`si-clean` uses a small tracking file to know exactly which launchers were modified by `si`. It does not blindly remove every `steam_<appid>` icon.
+`si-clean` only cleans up changes that were recorded by `si`.
+
+## Uninstallation
+
+To remove Steam KDE Icon Sync:
+
+```
+./uninstall.sh
+```
+
+If you cloned the repository, run it from the project directory.
+
+For a remote uninstall, you can use curl:
+
+```
+curl -fsSL https://raw.githubusercontent.com/ItsARCn/steam-kde-icon-sync/main/uninstall.sh | bash
+```
+
+Or wget:
+
+```
+wget -qO- https://raw.githubusercontent.com/ItsARCn/steam-kde-icon-sync/main/uninstall.sh | bash
+```
+
+The uninstaller removes:
+
+```
+~/.local/bin/si
+~/.local/bin/si-clean
+```
+
+It does NOT remove:
+
+* Steam game icons
+* `.desktop` files
+* Steam files
+* Your Steam games
+* Changes made to your system outside the utility
+
+If you ran `si-clean` before uninstalling, the icons created by `si` have already been removed and the original icons have been restored.
+
+If you uninstall without running `si-clean`, the icons and `.desktop` changes made by `si` are intentionally left untouched.
 
 ## How It Works
 
@@ -72,89 +154,68 @@ Steam stores game artwork in its local library cache.
 When you run `si`, it:
 
 1. Scans Steam's library artwork cache.
-2. Finds each game's `logo.png`.
+2. Finds the game's `logo.png`.
 3. Finds the matching Steam `.desktop` launcher.
 4. Checks whether the launcher currently uses `Icon=steam`.
-5. Copies the artwork to the local KDE icon directory.
+5. Copies the artwork into KDE's local icon directory.
 6. Changes the launcher to use a game-specific icon.
 7. Records the original icon setting.
 8. Refreshes KDE's application cache.
 
-The tracking data is stored at:
+The game-specific icons are stored in:
 
-```text
+```
+~/.local/share/icons/hicolor/256x256/apps/
+```
+
+Tracking information is stored in:
+
+```
 ~/.local/share/steam-kde-icon-sync/managed
 ```
 
-## Installation
+## Safe Cleanup
 
-### Quick install with curl
+`si-clean` does not simply delete every Steam-looking icon.
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/ItsARCn/steam-kde-icon-sync/main/install.sh | bash
+When `si` changes a launcher, it records:
+
+* The Steam App ID
+* The `.desktop` file that was changed
+* The original icon setting
+
+This allows `si-clean` to restore only the changes made by `si`.
+
+For example:
+
+```
+Before:
+Icon=steam
+
+After running si:
+Icon=steam_2923300
+
+After running si-clean:
+Icon=steam
 ```
 
-### Quick install with wget
+This prevents `si-clean` from accidentally removing unrelated icons or overwriting changes made by the user.
 
-```bash
-wget -qO- https://raw.githubusercontent.com/ItsARCn/steam-kde-icon-sync/main/install.sh | bash
-```
+## No Background Processes
 
-The installer automatically uses `curl` if available, otherwise `wget`.
+Steam KDE Icon Sync does not run continuously.
 
-It installs:
+There is:
 
-```text
-~/.local/bin/si
-~/.local/bin/si-clean
-```
+* No systemd service
+* No systemd timer
+* No daemon
+* No periodic scanning
+* No background resource usage
 
-### Manual installation
+The program only runs when you execute `si` or `si-clean`.
 
-Clone the repository:
-
-```bash
-git clone https://github.com/ItsARCn/steam-kde-icon-sync.git
-cd steam-kde-icon-sync
-./install.sh
-```
-
-## Usage
-
-After installing, simply run:
-
-```bash
-si
-```
-
-Run it whenever:
-
-* You install a new Steam game
-* A game has a generic Steam icon
-* Steam downloads new artwork
-* A game's KDE icon needs fixing
-
-There is intentionally no automatic background process. The tool only runs when you execute `si`.
-
-## Uninstallation
-
-Run:
-
-```bash
-./uninstall.sh
-```
-
-The uninstaller removes the `si` and `si-clean` commands but does **not** remove icons or modify your `.desktop` files.
-
-Your existing changes are left untouched.
-
-If you want to undo icons created by `si`, run:
-
-```bash
-si-clean
-```
-
-before uninstalling.
+This keeps it lightweight and avoids unnecessary CPU or RAM usage.
 
 ## Requirements
 
@@ -165,44 +226,76 @@ before uninstalling.
 * `kbuildsycoca6`
 * `curl` or `wget` for the quick installer
 
-The default Steam installation location is:
+The default Steam library location is:
 
-```text
+```
 ~/.local/share/Steam
 ```
 
 ## Limitations
 
-The tool currently expects Steam's library cache at:
+The current version expects Steam's artwork cache at:
 
-```text
+```
 ~/.local/share/Steam/appcache/librarycache
 ```
 
-Games must also have a corresponding Steam `.desktop` launcher in:
+It also expects Steam game launchers to be located in:
 
-```text
+```
 ~/.local/share/applications
 ```
 
-Steam's cache structure and artwork availability may vary between installations and Steam versions.
+Steam's cache structure and artwork availability can vary between installations and Steam versions.
 
-## Safety
+## Troubleshooting
 
-`si` only changes Steam game launchers that:
+### A game still has the Steam icon
 
-* contain the matching `steam://rungameid/<appid>` command
-* currently use `Icon=steam`
+Run:
 
-`si-clean` only operates on changes recorded by `si`.
+```
+si
+```
 
-The tool does not modify Steam's installation files.
+If it still does not change, the game's Steam artwork may not be available in the local cache or its `.desktop` launcher may not match the expected format.
+
+### KDE does not immediately show the new icon
+
+`si` automatically refreshes KDE's application cache using:
+
+```
+kbuildsycoca6
+```
+
+You should normally not need to run it manually.
+
+### Check whether a game launcher exists
+
+You can inspect your local application launchers with:
+
+```
+ls ~/.local/share/applications/
+```
+
+## Project Structure
+
+```
+steam-kde-icon-sync/
+├── si
+├── si-clean
+├── install.sh
+├── uninstall.sh
+├── README.md
+├── LICENSE
+└── .gitignore
+```
 
 ## Contributing
 
-Issues, improvements, and pull requests are welcome.
+Contributions, bug reports, and improvements are welcome.
 
-If you find a Steam game that isn't handled correctly, open an issue with:
+If you find a game that does not work correctly, open an issue with:
 
 * Game name
 * Steam App ID
@@ -212,13 +305,10 @@ If you find a Steam game that isn't handled correctly, open an issue with:
 
 ## License
 
-This project is licensed under the MIT License.
+Steam KDE Icon Sync is released under the MIT License.
 
-```
+See the `LICENSE` file for the full license text.
 
-### One important thing
+## Author
 
-There's **one mismatch** we need to fix after this: our current `uninstall.sh` only removes `si`, while this README says it removes **both `si` and `si-clean`**.
-
-So **don't worry about that yet**. Commit this README, then we'll fix `uninstall.sh` to match it. After that, `.gitignore` is the last small file.
-```
+Created by ItsARCn.
