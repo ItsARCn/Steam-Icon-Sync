@@ -13,6 +13,22 @@ touch "$STATE_FILE"
 
 changed=0
 
+refresh_desktop_database() {
+    if command -v kbuildsycoca6 >/dev/null 2>&1; then
+        kbuildsycoca6 >/dev/null 2>&1
+    elif command -v kbuildsycoca5 >/dev/null 2>&1; then
+        kbuildsycoca5 >/dev/null 2>&1
+    fi
+
+    if command -v update-desktop-database >/dev/null 2>&1; then
+        update-desktop-database "$APP_DIR" >/dev/null 2>&1
+    fi
+
+    if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+        gtk-update-icon-cache -f -t "$HOME/.local/share/icons/hicolor" >/dev/null 2>&1 || true
+    fi
+}
+
 for cache in "$STEAM"/appcache/librarycache/*; do
     [ -d "$cache" ] || continue
 
@@ -51,7 +67,7 @@ for cache in "$STEAM"/appcache/librarycache/*; do
     done
 done
 
-kbuildsycoca6 >/dev/null 2>&1
+refresh_desktop_database
 
 if [ "$changed" -eq 0 ]; then
     echo "No icons needed updating."
