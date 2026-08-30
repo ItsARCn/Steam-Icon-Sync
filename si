@@ -1,10 +1,15 @@
 #!/usr/bin/env bash
 
+set -e
+
 STEAM="$HOME/.local/share/Steam"
 ICON_DIR="$HOME/.local/share/icons/hicolor/256x256/apps"
 APP_DIR="$HOME/.local/share/applications"
+STATE_DIR="$HOME/.local/share/steam-kde-icon-sync"
+STATE_FILE="$STATE_DIR/managed"
 
-mkdir -p "$ICON_DIR"
+mkdir -p "$ICON_DIR" "$STATE_DIR"
+touch "$STATE_FILE"
 
 changed=0
 
@@ -29,11 +34,14 @@ for cache in "$STEAM"/appcache/librarycache/*; do
         if grep -q "steam://rungameid/$appid" "$desktop" &&
            grep -q '^Icon=steam$' "$desktop"; then
 
-            cp -f "$logo" "$icon_path"
-
-            sed -i "s/^Icon=steam$/Icon=$icon_name/" "$desktop"
-
             game_name=$(grep '^Name=' "$desktop" | head -1 | cut -d= -f2-)
+
+            if ! grep -Fq "|$desktop|" "$STATE_FILE"; then
+                printf '%s|%s|%s\n' "$appid" "$desktop" "steam" >> "$STATE_FILE"
+            fi
+
+            cp -f "$logo" "$icon_path"
+            sed -i "s/^Icon=steam$/Icon=$icon_name/" "$desktop"
 
             printf '✓ Changed icon: %s\n' "$game_name"
             changed=$((changed + 1))
