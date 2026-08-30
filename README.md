@@ -306,7 +306,7 @@ If you find a game that does not work correctly, open an issue with:
 
 Steam KDE Icon Sync is released under the MIT License.
 
-See the `(LICENSE)[LICENSE]` file for the full license text.
+See the [LICENSE](/LICENSE) file for the full license text.
 
 ## Author
 
