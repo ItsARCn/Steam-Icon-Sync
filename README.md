@@ -28,7 +28,7 @@ You do not need to clone the repository.
 ```
 curl -fsSL https://raw.githubusercontent.com/ItsARCn/steam-kde-icon-sync/main/install.sh | bash
 ```
-
+#### or
 ### Using wget
 
 ```
