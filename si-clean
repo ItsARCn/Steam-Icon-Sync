@@ -1,31 +1,48 @@
 #!/usr/bin/env bash
 
+set -e
+
 ICON_DIR="$HOME/.local/share/icons/hicolor/256x256/apps"
-APP_DIR="$HOME/.local/share/applications"
+STATE_DIR="$HOME/.local/share/steam-kde-icon-sync"
+STATE_FILE="$STATE_DIR/managed"
+
+if [ ! -f "$STATE_FILE" ]; then
+    echo "No icons managed by si were found."
+    exit 0
+fi
 
 cleaned=0
+remaining="$STATE_DIR/managed.tmp"
 
-for desktop in "$APP_DIR"/*.desktop; do
-    [ -f "$desktop" ] || continue
+: > "$remaining"
 
-    icon=$(grep '^Icon=steam_[0-9][0-9]*$' "$desktop" | cut -d= -f2-)
+while IFS='|' read -r appid desktop original_icon; do
+    [ -n "$appid" ] || continue
+    [ -n "$desktop" ] || continue
 
-    [ -n "$icon" ] || continue
+    icon_name="steam_${appid}"
+    icon_path="$ICON_DIR/$icon_name.png"
 
-    appid="${icon#steam_}"
-    icon_path="$ICON_DIR/$icon.png"
+    if [ -f "$desktop" ] &&
+       grep -q "steam://rungameid/$appid" "$desktop" &&
+       grep -q "^Icon=$icon_name$" "$desktop"; then
 
-    sed -i "s/^Icon=$icon$/Icon=steam/" "$desktop"
+        sed -i "s/^Icon=$icon_name$/Icon=$original_icon/" "$desktop"
 
-    if [ -f "$icon_path" ]; then
-        rm -f "$icon_path"
+        if [ -f "$icon_path" ]; then
+            rm -f "$icon_path"
+        fi
+
+        game_name=$(grep '^Name=' "$desktop" | head -1 | cut -d= -f2-)
+
+        printf '✓ Restored icon: %s\n' "$game_name"
+        cleaned=$((cleaned + 1))
+    else
+        printf '%s|%s|%s\n' "$appid" "$desktop" "$original_icon" >> "$remaining"
     fi
+done < "$STATE_FILE"
 
-    game_name=$(grep '^Name=' "$desktop" | head -1 | cut -d= -f2-)
-
-    printf '✓ Restored icon: %s\n' "$game_name"
-    cleaned=$((cleaned + 1))
-done
+mv "$remaining" "$STATE_FILE"
 
 kbuildsycoca6 >/dev/null 2>&1
 
