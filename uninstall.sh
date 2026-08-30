@@ -11,6 +11,5 @@ else
 fi
 
 echo
-echo "Steam game icons already copied by si were not removed."
-echo "To remove those icons manually, delete:"
-echo "$ICON_DIR/steam_*.png"
+echo "Steam game icons copied by si were not removed."
+echo "Your Steam game icons and .desktop files were left untouched."
