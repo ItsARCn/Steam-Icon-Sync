@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+ICON_DIR="$HOME/.local/share/icons/hicolor/256x256/apps"
+APP_DIR="$HOME/.local/share/applications"
+
+cleaned=0
+
+for desktop in "$APP_DIR"/*.desktop; do
+    [ -f "$desktop" ] || continue
+
+    icon=$(grep '^Icon=steam_[0-9][0-9]*$' "$desktop" | cut -d= -f2-)
+
+    [ -n "$icon" ] || continue
+
+    appid="${icon#steam_}"
+    icon_path="$ICON_DIR/$icon.png"
+
+    sed -i "s/^Icon=$icon$/Icon=steam/" "$desktop"
+
+    if [ -f "$icon_path" ]; then
+        rm -f "$icon_path"
+    fi
+
+    game_name=$(grep '^Name=' "$desktop" | head -1 | cut -d= -f2-)
+
+    printf '✓ Restored icon: %s\n' "$game_name"
+    cleaned=$((cleaned + 1))
+done
+
+kbuildsycoca6 >/dev/null 2>&1
+
+if [ "$cleaned" -eq 0 ]; then
+    echo "No icons created by si needed cleaning."
+else
+    printf '\n✓ Done. Restored %d icon(s).\n' "$cleaned"
+fi
