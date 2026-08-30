@@ -2,12 +2,12 @@
 
 set -e
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 INSTALL_DIR="$HOME/.local/bin"
+RAW_URL="https://raw.githubusercontent.com/ItsARCn/steam-kde-icon-sync/main/si"
 
 mkdir -p "$INSTALL_DIR"
 
-cp "$SCRIPT_DIR/si" "$INSTALL_DIR/si"
+curl -fsSL "$RAW_URL" -o "$INSTALL_DIR/si"
 chmod +x "$INSTALL_DIR/si"
 
 echo "✓ Installed steam-kde-icon-sync"
